@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PowerLens: Taming LLM Agents for Safe and Personalized Mobile Power Management</title>
+  <meta name="description" content="PowerLens: An LLM-powered personalized power management system for Android devices. Under Submission.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --blue-light: #dbeafe;
+      --green: #16a34a;
+      --green-light: #dcfce7;
+      --red: #dc2626;
+      --red-light: #fee2e2;
+      --dark: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,.90);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .nav-logo {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--blue);
+      text-decoration: none;
+      letter-spacing: -.3px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: .875rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--blue); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 50%, #f0fdf4 100%);
+      padding: 72px 24px 56px;
+      text-align: center;
+    }
+    .venue-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--blue);
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 99px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(1.75rem, 4vw, 2.75rem);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -.03em;
+      max-width: 860px;
+      margin: 0 auto 20px;
+      color: var(--dark);
+    }
+    .hero h1 span { color: var(--blue); }
+    .authors {
+      font-size: .95rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      line-height: 1.8;
+    }
+    .authors strong { color: var(--dark); font-weight: 600; }
+    .affiliations {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all .2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(37,99,235,.30);
+    }
+    .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(37,99,235,.35); }
+    .btn-outline {
+      background: #fff;
+      color: var(--dark);
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .btn-outline:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-1px); }
+
+    /* SECTION */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 64px 24px;
+    }
+    .section-sm { padding: 48px 24px; }
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin-bottom: 8px;
+      color: var(--dark);
+    }
+    .section-title .accent { color: var(--blue); }
+    .section-lead {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 40px;
+      max-width: 680px;
+    }
+    .divider {
+      width: 48px;
+      height: 4px;
+      background: var(--blue);
+      border-radius: 2px;
+      margin-bottom: 16px;
+    }
+
+    /* KEY RESULTS */
+    .results-bg {
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+    }
+    .stat-card {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+      transition: all .25s;
+    }
+    .stat-card:hover {
+      border-color: var(--blue);
+      box-shadow: 0 4px 20px rgba(37,99,235,.12);
+      transform: translateY(-2px);
+    }
+    .stat-value {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: var(--blue);
+      letter-spacing: -.04em;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-value.green { color: var(--green); }
+    .stat-value.red { color: var(--red); }
+    .stat-label {
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    /* ABSTRACT */
+    .abstract-box {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      box-shadow: var(--shadow);
+    }
+    .abstract-box p {
+      font-size: 1rem;
+      color: #374151;
+      line-height: 1.85;
+      text-align: justify;
+    }
+
+    /* PIPELINE */
+    .pipeline-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .pipeline-step {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      position: relative;
+      transition: all .25s;
+    }
+    .pipeline-step:hover {
+      border-color: var(--blue);
+      box-shadow: 0 4px 20px rgba(37,99,235,.10);
+    }
+    .step-number {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+    .step-title {
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 6px;
+    }
+    .step-desc {
+      font-size: .83rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .step-icon {
+      font-size: 1.5rem;
+      color: var(--blue);
+      margin-bottom: 12px;
+      opacity: .85;
+    }
+    .step-badge {
+      display: inline-block;
+      font-size: .65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+    }
+    .badge-llm { background: var(--blue-light); color: var(--blue-dark); }
+    .badge-det { background: var(--green-light); color: var(--green); }
+
+    /* IMAGES */
+    .img-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      text-align: center;
+      padding: 8px;
+    }
+    .img-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+    }
+    .img-caption {
+      font-size: .82rem;
+      color: var(--muted);
+      padding: 10px 12px 6px;
+      text-align: center;
+    }
+
+    /* VIDEO PLACEHOLDER */
+    .video-placeholder {
+      background: #0f172a;
+      border: 2px dashed #334155;
+      border-radius: var(--radius);
+      padding: 60px 24px;
+      text-align: center;
+      color: #94a3b8;
+      transition: all .25s;
+    }
+    .video-placeholder:hover {
+      border-color: var(--blue);
+      background: #1e293b;
+    }
+    .video-placeholder i {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      color: #475569;
+    }
+    .video-placeholder h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+    }
+    .video-placeholder p {
+      font-size: .85rem;
+      color: #64748b;
+    }
+
+    /* TABLES */
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .88rem;
+      margin-top: 0;
+    }
+    .results-table th, .results-table td {
+      padding: 10px 14px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .results-table th {
+      background: var(--bg);
+      font-weight: 700;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--muted);
+    }
+    .results-table td { color: var(--dark); }
+    .results-table tr:hover td { background: #f1f5f9; }
+    .results-table .highlight { color: var(--blue); font-weight: 700; }
+    .results-table .best { background: var(--blue-light); font-weight: 700; color: var(--blue-dark); }
+
+    .table-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .table-card .table-title {
+      padding: 16px 20px 8px;
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    /* WORKFLOW STEPS */
+    .wf-step {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .wf-step:last-child { border-bottom: none; }
+    .wf-num {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-weight: 700;
+      font-size: .85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .wf-content h4 {
+      font-size: .97rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 4px;
+    }
+    .wf-content p {
+      font-size: .88rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* BIBTEX */
+    .bibtex-bg {
+      background: var(--dark);
+      color: #e2e8f0;
+    }
+    .bibtex-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 56px 24px;
+    }
+    .bibtex-inner .section-title { color: #f1f5f9; }
+    .bibtex-inner .divider { background: #475569; }
+    .bibtex-code {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem;
+      line-height: 1.8;
+      color: #94a3b8;
+      overflow-x: auto;
+      position: relative;
+    }
+    .bibtex-code .k { color: #60a5fa; }
+    .bibtex-code .v { color: #a3e635; }
+    .bibtex-code .s { color: #fbbf24; }
+    .copy-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #94a3b8;
+      font-size: .75rem;
+      padding: 5px 12px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all .2s;
+    }
+    .copy-btn:hover { background: #2563eb; color: #fff; border-color: #2563eb; }
+
+    /* FOOTER */
+    footer {
+      background: #0f172a;
+      border-top: 1px solid #1e293b;
+      padding: 32px 24px;
+      text-align: center;
+      color: #64748b;
+      font-size: .85rem;
+    }
+    footer a { color: #94a3b8; text-decoration: none; transition: color .2s; }
+    footer a:hover { color: var(--blue); }
+
+    /* TWO COL */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .abstract-box { padding: 24px 20px; }
+      .bibtex-code { padding: 20px 16px; font-size: .76rem; }
+      .hero h1 { font-size: 1.7rem; }
+      .pipeline-steps { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">PowerLens</a>
+    <ul class="nav-links">
+      <li><a href="#abstract">Abstract</a></li>
+      <li><a href="#demo">Demo</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#app">App</a></li>
+      <li><a href="#overview">Motivation</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="venue-badge">
+    <i class="fas fa-award" style="font-size:.8rem;"></i>
+    Under Submission
+  </div>
+  <h1>
+    <span>PowerLens</span>: Taming LLM Agents for Safe and Personalized Mobile Power Management
+  </h1>
+  <p class="authors">
+    Anonymous Authors
+  </p>
+  <p class="affiliations">
+    Under Double-Blind Review
+  </p>
+  <div class="btn-group">
+    <a href="#demo" class="btn btn-primary">
+      <i class="fas fa-play-circle"></i> Watch Demo
+    </a>
+    <a href="#app" class="btn btn-outline">
+      <i class="fas fa-mobile-screen-button"></i> App Overview
+    </a>
+  </div>
+</header>
+
+<!-- ABSTRACT -->
+<section id="abstract">
+  <div class="section">
+    <div class="divider"></div>
+    <h2 class="section-title">Abstract</h2>
+    <p class="section-lead">What is PowerLens and why does it matter?</p>
+    <div class="abstract-box">
+      <p>
+        Battery life remains a critical challenge for mobile devices, yet existing power management mechanisms rely on static rules or coarse-grained heuristics that ignore user activities and personal preferences.
+        We present <strong>PowerLens</strong>, a system that tames the reasoning power of LLMs for safe and personalized mobile power management on Android devices.
+        The key idea is that LLMs' commonsense reasoning can bridge the semantic gap between user activities and system parameters, enabling zero-shot, context-aware policy generation that adapts to individual preferences through implicit feedback.
+        PowerLens employs a multi-agent architecture that recognizes user context from UI semantics and generates holistic power policies across 18 device parameters.
+        A PDL-based constraint framework verifies every action before execution, while a two-tier memory system learns individualized preferences from implicit user overrides through confidence-based distillation, requiring no explicit configuration and converging within 3&ndash;5 days.
+        Extensive experiments on a rooted Android device show that PowerLens achieves 81.7% action accuracy and 38.8% energy saving over stock Android, outperforming rule-based and LLM-based baselines, with high user satisfaction, fast preference convergence, and strong safety guarantees, with the system itself consuming only 0.5% of daily battery capacity.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO VIDEOS -->
+<section id="demo" style="background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="section">
+    <div class="divider"></div>
+    <h2 class="section-title">Demo <span class="accent">Videos</span></h2>
+    <p class="section-lead">See PowerLens in action on a real Android device.</p>
+
+    <div class="two-col">
+      <div>
+        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:var(--radius);">
+          <iframe src="https://www.youtube.com/embed/5D6kZCLWXBM" title="Demo 1: Real-Time Power Management" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+        </div>
+        <p style="font-size:.88rem;color:var(--muted);margin-top:10px;text-align:center;"><strong>Demo 1: Real-Time Power Management</strong> — PowerLens adapting policies in real time while playing music on Spotify.</p>
+      </div>
+      <div>
+        <div class="video-placeholder">
+          <i class="fas fa-hourglass-half"></i>
+          <h4>Coming Soon</h4>
+          <p>Stay tuned for more demos.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MOTIVATION -->
+<section id="overview">
+  <div class="section">
+    <div class="divider"></div>
+    <h2 class="section-title">Why <span class="accent">PowerLens</span>?</h2>
+    <p class="section-lead">Traditional power savers apply one-size-fits-all rules that degrade user experience. PowerLens understands context and learns what matters to each user.</p>
+    <div class="img-card">
+      <img src="figures/motivation.png" alt="Motivation: Traditional power saver vs PowerLens">
+      <p class="img-caption">Traditional power saver vs. PowerLens in a low-battery navigation scenario. Global rules degrade experience by throttling GPS and dimming brightness; PowerLens preserves app-critical resources and learned user preferences.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SYSTEM ARCHITECTURE -->
+<section id="architecture" style="background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="section">
+    <div class="divider"></div>
+    <h2 class="section-title">System <span class="accent">Architecture</span></h2>
+    <p class="section-lead">A multi-agent pipeline that observes, decides, validates, and learns from every interaction.</p>
+    <div class="img-card">
+      <img src="figures/overview.png" alt="PowerLens system architecture">
+      <p class="img-caption">PowerLens system overview. Each cycle: &#10102; Accessibility captures UI tree, &#10103; Activity Agent recognizes context, &#10104; Policy Agent generates strategy, &#10105;&#10106; Execution Agent verifies and applies via shell commands, &#10107; Feedback Agent detects user overrides. The Memory System stores preferences for personalization.</p>
+    </div>
+
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <div class="step-icon"><i class="fas fa-eye"></i></div>
+        <div class="step-number">Agent 1</div>
+        <div class="step-title">Activity Agent</div>
+        <p class="step-desc">Recognizes current user activity from UI semantics and system state. Outputs activity type, sub-activity, criticality level, and a context signature for memory retrieval.</p>
+        <span class="step-badge badge-llm">LLM Call</span>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-icon"><i class="fas fa-brain"></i></div>
+        <div class="step-number">Agent 2</div>
+        <div class="step-title">Policy Agent</div>
+        <p class="step-desc">Generates holistic power policies across 18 parameters with priority arbitration: STM user locks > LPM context rules > LPM general profile. Respects PDL safety constraints.</p>
+        <span class="step-badge badge-llm">LLM Call</span>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-icon"><i class="fas fa-shield-halved"></i></div>
+        <div class="step-number">Agent 3</div>
+        <div class="step-title">Execution Agent</div>
+        <p class="step-desc">Verifies each action against PDL constraints and device capabilities (LLM call 3), then generates root shell commands (LLM call 4). Two-stage design prevents hallucinated reasoning from leaking into commands.</p>
+        <span class="step-badge badge-llm">2 LLM Calls</span>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-icon"><i class="fas fa-arrows-rotate"></i></div>
+        <div class="step-number">Agent 4</div>
+        <div class="step-title">Feedback Agent</div>
+        <p class="step-desc">Detects user overrides via deterministic state differencing&mdash;no LLM needed. Writes override constraints to STM and logs events for the Extractor's analysis.</p>
+        <span class="step-badge badge-det">Deterministic</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MEMORY SYSTEM -->
+<section>
+  <div class="section">
+    <div class="divider"></div>
+    <h2 class="section-title">Two-Tier <span class="accent">Memory</span> System</h2>
+    <p class="section-lead">Learning user preferences without asking&mdash;from short-term observations to long-term personal rules.</p>
+    <div class="img-card">
+      <img src="figures/memory.png" alt="Memory system: STM to LPM promotion">
+      <p class="img-caption">Two-tier memory architecture: Short-Term Memory (STM) captures session-scoped state; the Extractor asynchronously distills consistent patterns into Long-term Personal Memory (LPM) via confidence-based promotion.</p>
+    </div>
+
+    <div style="margin-top:32px;">
+      <div class="wf-step">
+        <div class="wf-num">1</div>
+        <div class="wf-content">
+          <h4>Observe</h4>
+          <p>When a user manually overrides a setting (e.g., increases brightness after the system dimmed it), the Feedback Agent detects this via state differencing and logs a <strong>STRONG</strong> signal in STM.</p>
+        </div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">2</div>
+        <div class="wf-content">
+          <h4>Accumulate Confidence</h4>
+          <p>The Extractor (async, LLM-powered) infers user intent and updates confidence: <code>c<sub>new</sub> = c<sub>old</sub> &times; &lambda;<sup>&Delta;t</sup> + r</code>, where &lambda;=0.93 applies daily decay and r is the reward (+0.2 strong, +0.08 weak, &minus;0.5 conflict).</p>
+        </div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">3</div>
+        <div class="wf-content">
+          <h4>Promote to LPM</h4>
+          <p>When confidence exceeds &tau;<sub>c</sub>=0.8 (typically 3 days of consistent behavior), the candidate is promoted to a stable context rule. The LLM generalizes patterns (e.g., "Saturday 9AM" + "Sunday 9AM" &rarr; "weekend morning").</p>
+        </div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">4</div>
+        <div class="wf-content">
+          <h4>Adapt to Change</h4>
+          <p>If preferences shift, conflict signals rapidly erode the old rule (&minus;0.5 per conflict). New candidates begin their own promotion cycle, and once promoted, replace the stale rule sharing the same context signature.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APP SCREENSHOTS -->
+<section id="app">
+  <div class="section">
+    <div class="divider"></div>
+    <h2 class="section-title">PowerLens <span class="accent">App</span></h2>
+    <p class="section-lead">A companion Android app that serves as the control center for PowerLens, built for rooted devices.</p>
+
+    <div class="two-col" style="align-items: start;">
+      <div>
+        <div class="img-card">
+          <img src="figures/app_main.jpg" alt="PowerLens app main screen" style="max-width:340px; margin:0 auto;">
+        </div>
+        <p style="font-size:.88rem;color:var(--muted);margin-top:10px;text-align:center;"><strong>Main Dashboard</strong></p>
+      </div>
+      <div>
+        <div class="img-card">
+          <img src="figures/app_controls.jpg" alt="PowerLens app control panel" style="max-width:340px; margin:0 auto;">
+        </div>
+        <p style="font-size:.88rem;color:var(--muted);margin-top:10px;text-align:center;"><strong>Parameter Controls</strong></p>
+      </div>
+    </div>
+
+    <div style="margin-top:32px; display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:16px;">
+      <div class="pipeline-step">
+        <div class="step-icon"><i class="fas fa-gauge-high"></i></div>
+        <div class="step-title">Live Dashboard</div>
+        <p class="step-desc">Real-time view of battery level, brightness, connectivity, CPU frequencies, and all monitored parameters at a glance.</p>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-icon"><i class="fas fa-diagram-project"></i></div>
+        <div class="step-title">Pipeline Monitor</div>
+        <p class="step-desc">Observe the 4-agent pipeline (Activity &rarr; Policy &rarr; Exec &rarr; Feedback) with live status indicators showing which agent is active.</p>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-icon"><i class="fas fa-sliders"></i></div>
+        <div class="step-title">Direct Controls</div>
+        <p class="step-desc">Manual control over 18+ device parameters across wireless, display, sensors, audio, and CPU categories&mdash;also used for testing and debugging.</p>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-icon"><i class="fas fa-database"></i></div>
+        <div class="step-title">Memory Management</div>
+        <p class="step-desc">Clear STM/LPM, dump logs, and manage the two-tier memory system. Supports data collection for evaluation experiments.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTED APPS -->
+<section style="background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="section">
+    <div class="divider"></div>
+    <h2 class="section-title">Tested <span class="accent">Apps</span></h2>
+    <p class="section-lead">PowerLens has been evaluated across 7 app categories covering 48 real-world usage tasks on 25 popular apps.</p>
+
+    <style>
+      .app-category { margin-bottom: 32px; }
+      .app-cat-header {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 14px; padding-bottom: 8px;
+        border-bottom: 2px solid var(--border);
+      }
+      .app-cat-icon {
+        width: 36px; height: 36px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem; color: #fff; flex-shrink: 0;
+      }
+      .app-cat-name { font-size: 1.05rem; font-weight: 700; color: var(--dark); }
+      .app-cat-tasks { font-size: .78rem; color: var(--muted); margin-left: auto; }
+      .app-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+      .app-item {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 14px; border-radius: 8px;
+        border: 1px solid var(--border); background: var(--bg);
+        transition: all .2s;
+      }
+      .app-item:hover { border-color: var(--blue); background: var(--blue-light); }
+      .app-item img { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; }
+      .app-emoji { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; background: var(--white); border: 1px solid var(--border); }
+      .app-info { min-width: 0; }
+      .app-name { font-size: .88rem; font-weight: 700; color: var(--dark); }
+      .app-flag { font-size: .75rem; margin-left: 2px; }
+      .app-desc { font-size: .78rem; color: var(--muted); line-height: 1.4; }
+    </style>
+
+    <!-- Navigation -->
+    <div class="app-category">
+      <div class="app-cat-header">
+        <div class="app-cat-icon" style="background:#ef4444;"><i class="fas fa-location-dot"></i></div>
+        <span class="app-cat-name">Navigation</span>
+        <span class="app-cat-tasks">4 apps &middot; 8 tasks</span>
+      </div>
+      <div class="app-list">
+        <div class="app-item">
+          <img src="figures/icons/app_00.png" alt="Google Maps">
+          <div class="app-info">
+            <div class="app-name">Google Maps <span class="app-flag">🇺🇸</span></div>
+            <div class="app-desc">Route navigation, real-time traffic, POI search</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_01.png" alt="Baidu Maps">
+          <div class="app-info">
+            <div class="app-name">Baidu Maps (百度地图) <span class="app-flag">🇨🇳</span></div>
+            <div class="app-desc">Navigation, transit directions, local search</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_02.png" alt="Amap">
+          <div class="app-info">
+            <div class="app-name">Amap (高德地图) <span class="app-flag">🇨🇳</span></div>
+            <div class="app-desc">Driving & walking navigation, ride-hailing</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_03.png" alt="Tencent Maps">
+          <div class="app-info">
+            <div class="app-name"><em>TBD</em></div>
+            <div class="app-desc">To be updated</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video -->
+    <div class="app-category">
+      <div class="app-cat-header">
+        <div class="app-cat-icon" style="background:#f59e0b;"><i class="fas fa-play"></i></div>
+        <span class="app-cat-name">Video</span>
+        <span class="app-cat-tasks">3 apps &middot; 6 tasks</span>
+      </div>
+      <div class="app-list">
+        <div class="app-item">
+          <img src="figures/icons/app_04.png" alt="YouTube">
+          <div class="app-info">
+            <div class="app-name">YouTube <span class="app-flag">🇺🇸</span></div>
+            <div class="app-desc">Video streaming, shorts, live streams</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_05.png" alt="Bilibili">
+          <div class="app-info">
+            <div class="app-name">Bilibili (哔哩哔哩) <span class="app-flag">🇨🇳</span></div>
+            <div class="app-desc">Video watching, danmaku interaction, anime</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_06.png" alt="Netflix">
+          <div class="app-info">
+            <div class="app-name">Netflix <span class="app-flag">🇺🇸</span></div>
+            <div class="app-desc">Movie & TV series streaming, offline downloads</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meeting -->
+    <div class="app-category">
+      <div class="app-cat-header">
+        <div class="app-cat-icon" style="background:#3b82f6;"><i class="fas fa-video"></i></div>
+        <span class="app-cat-name">Meeting</span>
+        <span class="app-cat-tasks">4 apps &middot; 7 tasks</span>
+      </div>
+      <div class="app-list">
+        <div class="app-item">
+          <img src="figures/icons/app_07.png" alt="Zoom">
+          <div class="app-info">
+            <div class="app-name">Zoom <span class="app-flag">🇺🇸</span></div>
+            <div class="app-desc">Video/audio conferencing, screen sharing</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_08.png" alt="VooV Meeting">
+          <div class="app-info">
+            <div class="app-name"><em>TBD</em></div>
+            <div class="app-desc">To be updated</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_09.png" alt="Microsoft Teams">
+          <div class="app-info">
+            <div class="app-name">Microsoft Teams <span class="app-flag">🇺🇸</span></div>
+            <div class="app-desc">Team collaboration, video calls, file sharing</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_10.png" alt="Lark">
+          <div class="app-info">
+            <div class="app-name"><em>TBD</em></div>
+            <div class="app-desc">To be updated</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social -->
+    <div class="app-category">
+      <div class="app-cat-header">
+        <div class="app-cat-icon" style="background:#ec4899;"><i class="fas fa-comments"></i></div>
+        <span class="app-cat-name">Social</span>
+        <span class="app-cat-tasks">4 apps &middot; 7 tasks</span>
+      </div>
+      <div class="app-list">
+        <div class="app-item">
+          <img src="figures/icons/app_11.png" alt="Instagram">
+          <div class="app-info">
+            <div class="app-name">Instagram <span class="app-flag">🇺🇸</span></div>
+            <div class="app-desc">Photo/video sharing, stories, reels</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_12.png" alt="X">
+          <div class="app-info">
+            <div class="app-name">X (Twitter) <span class="app-flag">🇺🇸</span></div>
+            <div class="app-desc">Microblogging, news feed, messaging</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_13.png" alt="Weibo">
+          <div class="app-info">
+            <div class="app-name">Weibo (微博) <span class="app-flag">🇨🇳</span></div>
+            <div class="app-desc">Microblogging, trending topics, social feed</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_14.png" alt="Xiaohongshu">
+          <div class="app-info">
+            <div class="app-name">Xiaohongshu (小红书) <span class="app-flag">🇨🇳</span></div>
+            <div class="app-desc">Lifestyle sharing, reviews, shopping guides</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Music -->
+    <div class="app-category">
+      <div class="app-cat-header">
+        <div class="app-cat-icon" style="background:#22c55e;"><i class="fas fa-music"></i></div>
+        <span class="app-cat-name">Music</span>
+        <span class="app-cat-tasks">3 apps &middot; 6 tasks</span>
+      </div>
+      <div class="app-list">
+        <div class="app-item">
+          <img src="figures/icons/app_15.png" alt="Spotify">
+          <div class="app-info">
+            <div class="app-name">Spotify <span class="app-flag">🇸🇪</span></div>
+            <div class="app-desc">Music streaming, playlists, podcasts</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_16.png" alt="NetEase Cloud Music">
+          <div class="app-info">
+            <div class="app-name">NetEase Cloud Music (网易云音乐) <span class="app-flag">🇨🇳</span></div>
+            <div class="app-desc">Music streaming, lyrics, social comments</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_17.png" alt="Deluxe Music HD">
+          <div class="app-info">
+            <div class="app-name">Deluxe Music HD <span class="app-flag">🇩🇪</span></div>
+            <div class="app-desc">Hi-fi music streaming, curated playlists</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Feed -->
+    <div class="app-category">
+      <div class="app-cat-header">
+        <div class="app-cat-icon" style="background:#8b5cf6;"><i class="fas fa-newspaper"></i></div>
+        <span class="app-cat-name">Content Feed</span>
+        <span class="app-cat-tasks">3 apps &middot; 6 tasks</span>
+      </div>
+      <div class="app-list">
+        <div class="app-item">
+          <img src="figures/icons/app_18.png" alt="TikTok">
+          <div class="app-info">
+            <div class="app-name">TikTok (抖音) <span class="app-flag">🇨🇳</span></div>
+            <div class="app-desc">Short video feed, trends, live streams</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_19.png" alt="Reddit">
+          <div class="app-info">
+            <div class="app-name">Reddit <span class="app-flag">🇺🇸</span></div>
+            <div class="app-desc">Community discussion, news aggregation</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_20.png" alt="Zhihu">
+          <div class="app-info">
+            <div class="app-name">Zhihu (知乎) <span class="app-flag">🇨🇳</span></div>
+            <div class="app-desc">Q&A platform, knowledge sharing, articles</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reading -->
+    <div class="app-category">
+      <div class="app-cat-header">
+        <div class="app-cat-icon" style="background:#06b6d4;"><i class="fas fa-book-open"></i></div>
+        <span class="app-cat-name">Reading</span>
+        <span class="app-cat-tasks">4 apps &middot; 8 tasks</span>
+      </div>
+      <div class="app-list">
+        <div class="app-item">
+          <img src="figures/icons/app_21.png" alt="WeRead">
+          <div class="app-info">
+            <div class="app-name">WeRead (微信读书) <span class="app-flag">🇨🇳</span></div>
+            <div class="app-desc">E-book reading, social reading, highlights</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_22.png" alt="Kuaikan Comics">
+          <div class="app-info">
+            <div class="app-name"><em>TBD</em></div>
+            <div class="app-desc">To be updated</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_23.png" alt="Kindle">
+          <div class="app-info">
+            <div class="app-name">Kindle <span class="app-flag">🇺🇸</span></div>
+            <div class="app-desc">E-book reading, dark/light mode, annotations</div>
+          </div>
+        </div>
+        <div class="app-item">
+          <img src="figures/icons/app_24.png" alt="Ximalaya">
+          <div class="app-info">
+            <div class="app-name"><em>TBD</em></div>
+            <div class="app-desc">To be updated</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px; text-align:center;">
+      <p style="font-size:.88rem; color:var(--muted);">
+        <strong>25 apps</strong> &middot; <strong>7 categories</strong> &middot; <strong>48 tasks</strong> &middot; <strong>144 scenario instances</strong> (3 battery levels each)
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>
+    &copy; 2026 PowerLens Project &mdash;
+    Under Submission
+  </p>
+  <p style="margin-top: 8px; font-size: .78rem; color: #475569;">
+    Anonymous Authors &nbsp;&bull;&nbsp; Under Double-Blind Review
+  </p>
+</footer>
+
+</body>
+</html>
